@@ -5,12 +5,21 @@
 # and static leases
 # This directory is where your application will access the database.
 fuse:
-  dir: "/litefs"
+  dir: "/pb_data"
 
 # This directory is where LiteFS will store internal data.
 # You must place this directory on a persistent volume.
 data:
   dir: "/var/lib/litefs"
+
+# This section defines a list of commands to run after LiteFS has connected
+# and sync'd with the cluster. You can run multiple commands but LiteFS expects
+# the last command to be long-running (e.g. an application server). When the
+# last command exits, LiteFS is shut down.
+exec:
+  - cmd: "pocketbase migrate up"
+    if-candidate: true
+  - cmd: "pocketbase serve --http 0.0.0.0:8055"
 
 # The lease section defines how LiteFS creates a cluster and
 # implements leader election. For dynamic clusters, use the
@@ -24,12 +33,9 @@ lease:
 
   # Required. The URL for this node's LiteFS API.
   # Should match HTTP port.
-  advertise-url: "http://primary:20202"
+  advertise-url: "http://primary-pocketbase:20202"
 
   # Specifies whether the node can become the primary. If using
   # "static" leasing, this should be set to true on the primary
   # and false on the replicas.
   candidate: $IS_PRIMARY
-
-exec:
-  - cmd: "litefs-example -addr :8081 -dsn /litefs/db"

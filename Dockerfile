@@ -1,9 +1,9 @@
 # Build our application using a Go builder.
 FROM golang:1.20 AS builder
 
-WORKDIR /src/litefs-example
+WORKDIR /go/src/app
 COPY . .
-RUN go build -buildvcs=false -ldflags "-s -w -extldflags '-static'" -tags osusergo,netgo -o /usr/local/bin/litefs-example ./cmd/litefs-example
+RUN go build -buildvcs=false -ldflags "-s -w -extldflags '-static'" -tags osusergo,netgo -o /usr/local/bin/litefs-example ./cmd/pocketbase
 
 
 # Our final Docker image stage starts here.
@@ -28,6 +28,9 @@ RUN cp /tmp/$LITEFS_CONFIG /etc/litefs.yml
 # so we can communicate with the Consul server over HTTPS. cURL is added so
 # we can call our HTTP endpoints for debugging.
 RUN apk add bash fuse3 sqlite ca-certificates curl
+
+# Copy migrations from local directory to container
+COPY ./migrations /pb_migrations
 
 # Run LiteFS as the entrypoint. After it has connected and sync'd with the
 # cluster, it will run the commands listed in the "exec" field of the config.
