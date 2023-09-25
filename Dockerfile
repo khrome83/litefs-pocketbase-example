@@ -3,7 +3,7 @@ FROM golang:1.20 AS builder
 
 WORKDIR /go/src/app
 COPY . .
-RUN go build -buildvcs=false -ldflags "-s -w -extldflags '-static'" -tags osusergo,netgo -o /usr/local/bin/litefs-example ./cmd/pocketbase
+RUN go build -buildvcs=false -ldflags "-s -w -extldflags '-static'" -tags osusergo,netgo -o /usr/local/bin/pocketbase ./cmd/pocketbase
 
 
 # Our final Docker image stage starts here.
@@ -12,7 +12,7 @@ ARG LITEFS_CONFIG=litefs.yml
 
 # Copy binaries from the previous build stages.
 COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
-COPY --from=builder /usr/local/bin/litefs-example /usr/local/bin/litefs-example
+COPY --from=builder /usr/local/bin/pocketbase /usr/local/bin/pocketbase
 
 # Copy the possible LiteFS configurations.
 ADD fly-io-config/etc/litefs.yml /tmp/litefs.yml
